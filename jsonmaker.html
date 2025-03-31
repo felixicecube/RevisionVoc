@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creer un test</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #121212;
+        color: #ffffff;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        text-align: center;
+        background-color: #333333;
+        padding: 10px;
+    }
+
+    form {
+        max-width: 400px;
+        margin: 0 auto;
+        background-color: #333333;
+        padding: 20px;
+        border-radius: 5px;
+    }
+
+    label, input {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        background-color: #555555;
+        color: #ffffff;
+        border-radius: 5px;
+    }
+
+    button {
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    button:hover {
+        background-color: #0056b3;
+    }
+
+    h2 {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+        text-align: center;
+    }
+
+    li {
+        background-color: #333333;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        display: inline-block; 
+        margin-right: 10px;
+    }
+    button.download {
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 20px;
+        display: block;
+        margin: 0 auto;
+    }
+
+    button.download:hover {
+        background-color: #0056b3;
+    }
+    .bouton-redirection{
+        text-align: center;
+        margin-top: 20px;
+    }
+    .bouton-redirection a{
+            background-color: #8a0a08;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+    .delete-button {
+        background-color: #8a0a08;
+        color: #ffffff;
+        border: none;
+        padding: 5px 10px; /* Ajustez la taille du bouton selon vos préférences */
+        cursor: pointer;
+        border-radius: 5px;
+        margin-left: 10px; /* Ajoutez un espace à gauche du bouton pour l'esthétique */
+    }
+
+
+    </style>
+</head>
+<body>
+    <h1>Creer un test</h1>
+    <form id="translationForm">
+        <label for="frenchWord">Mot en français:</label>
+        <input type="text" id="frenchWord" required>
+        
+        <label for="englishTranslation">Traduction en anglais:</label>
+        <input type="text" id="englishTranslation" required>
+
+        <button type="submit" onclick="addTranslation()">Ajouter la traduction</button>
+    </form>
+
+    <h2>Liste des traductions</h2>
+    <ul id="translationList">
+        <!-- Les traductions seront ajoutées ici -->
+    </ul>
+
+    <button onclick="downloadJSON()" class="download">Télécharger le fichier JSON</button>
+    <div class="bouton-redirection"><a href="index.html">← Retour</a></div>
+    <script>
+        const translations = [];
+
+        function addTranslation() {
+            const frenchWord = document.getElementById("frenchWord").value;
+            const englishTranslation = document.getElementById("englishTranslation").value;
+
+            if (frenchWord && englishTranslation) {
+                translations.push({ french: frenchWord, english: englishTranslation });
+                updateTranslationList();
+                clearInputs();
+            }
+        }
+
+        function updateTranslationList() {
+            const translationList = document.getElementById("translationList");
+            translationList.innerHTML = "";
+            translations.forEach((translation, index) => {
+            const listItem = document.createElement("li");
+
+            const deleteButton = document.createElement("boutton-suprimer");
+            deleteButton.textContent = "❌";
+            deleteButton.onclick = () => deleteTranslation(index);
+
+            listItem.textContent = `French: ${translation.french}, English: ${translation.english}`;
+            listItem.appendChild(deleteButton);
+
+            translationList.appendChild(listItem);
+            });
+        }
+        function deleteTranslation(index) {
+            translations.splice(index, 1);
+            updateTranslationList();
+        }
+
+        function clearInputs() {
+            document.getElementById("frenchWord").value = "";
+            document.getElementById("englishTranslation").value = "";
+        }
+
+        function downloadJSON() {
+            const jsonData = JSON.stringify(translations, null, 2);
+            const blob = new Blob([jsonData], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "translations.json";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+    </script>
+</body>
+</html>
