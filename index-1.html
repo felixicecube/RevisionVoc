@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réviser le Vocabulaire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #121212; /* Couleur de fond sombre */
+            color: #fff; /* Couleur du texte */
+        }
+
+        h1 {
+            text-align: center;
+            background-color: #333333;
+            padding: 10px;
+        }
+        p{
+            text-align: left;
+        }
+
+        #vocab-question {
+            font-size: 24px;
+            margin: 20px;
+            padding-top: 5px;
+        }
+
+        #response-input {
+            font-size: 18px;
+            padding: 10px;
+            border: none;
+            background-color: #555555;
+            color: #ffffff;
+            border-radius: 5px;
+        }
+
+        #check-button {
+            font-size: 18px;
+            padding: 10px 20px; 
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 5px;
+        }
+
+        #check-button:hover {
+            background-color: #0056b3; /* Couleur de fond du bouton au survol */
+        }
+
+        #result {
+            font-size: 20px;
+            margin: 5px;
+            font-weight: bold;
+        }
+
+        #score {
+            font-size: 18px;
+            margin: 10px;
+        }
+
+        #score-value {
+            color: #007bff; /* Couleur du score */
+        }
+        #file-input {
+            display: none;
+        } 
+        #import-button {
+            font-size: 18px;
+            display: inline-block;
+            background-color: #185e0d;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #bouton-melanger{
+            display: inline-block;
+            background-color: #185e0d;
+            color: #fff;
+            margin: 5px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .bouton-creer{
+            text-align: center;
+            padding: 20px 20px;
+        }
+        .bouton-creer a{
+            background-color: #0056b3;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            
+        }
+        .bouton-retour{
+            text-align: center;
+            padding: 10px 20px;
+        }
+        .bouton-retour a{
+            background-color: #8a0a08;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        #download-button{
+            display: inline-block;
+            background-color: #185e0d; 
+            color: #fff;
+            padding: 10px 20px;
+            border: none; 
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #most-missed-words-container {
+            background-color: #333333;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 200px;
+            position: absolute;
+            right: 20px;
+        } 
+        #question-box {
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 10px;
+            background-color: #333333;
+            border-radius: 5px;
+        }
+        #container{
+            display: flex;
+            justify-content: center;
+        }
+
+        @media screen and (max-width: 930px) {
+            #most-missed-words-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Réviser le Vocabulaire</h1>
+    <div id= "container">
+    <div id="question-box">
+        <div id="vocab-question">Quelle est la traduction de <span id="word"></span>?</div>
+        <input type="text" id="response-input" placeholder="Entrez votre réponse">
+        <button id="check-button">Vérifier</button>
+        <div id="result"></div>
+        <input type="file" id="file-input" accept=".json">
+        <div id="score">Score : <span id="score-value">0</span></div>
+        <button id="bouton-melanger">Mélanger 🔀</button>
+    </div>
+    <div id="most-missed-words-container">
+        <h3>Mots les plus ratés</h3>
+       
+        <div id="most-missed-words"> 
+            <p>1 - .............................</p>
+            <p>2 - .............................</p>
+            <p>3 - .............................</p>
+            <p>4 - .............................</p>
+            <p>5 - .............................</p>  
+        </div>
+        <button id="download-button">Télécharger le JSON</button>
+    </div>
+    </div>
+    <button id="import-button">Importer des questions 📥​</button>
+    <div class="bouton-creer"><a href="jsonmaker.html">Créer un test ✏️​</a></div>
+    <div class="bouton-retour"><a href="../index.html">← Retour ←​</a></div>
+    
+
+    <script>
+        // Variables
+        let missedWords = {};
+        let currentWordIndex = 0;
+        let score = 0;
+        let vocabulary = [
+            { french: "l'horloge", english: "clock" },
+            { french: "l'ordinateur", english: "computer" },
+            { french: "le téléphone", english: "phone" },
+            { french: "le livre", english: "book" },
+            { french: "la musique", english: "music" },
+            { french: "la voiture", english: "car" },
+            { french: "le chien", english: "dog" },
+            { french: "le chat", english: "cat" },
+            { french: "la maison", english: "house" },
+            { french: "le vélo", english: "bike" }
+            
+        ];
+
+        // Éléments HTML
+        const wordElement = document.getElementById("word");
+        const responseInput = document.getElementById("response-input");
+        const checkButton = document.getElementById("check-button");
+        const result = document.getElementById("result");
+        const scoreElement = document.getElementById("score-value");
+        const downloadButton = document.getElementById("download-button");
+        const fileInput = document.getElementById("file-input");
+        const importButton = document.getElementById("import-button");
+        const boutonMelanger = document.getElementById("bouton-melanger");
+
+        // Fonctions
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function displayWord() {
+            wordElement.textContent = vocabulary[currentWordIndex].french;
+        }
+
+        function checkAnswer() {
+            const userAnswer = responseInput.value.toLowerCase();
+            const correctAnswer = vocabulary[currentWordIndex].english.toLowerCase();
+            const frenchWord = vocabulary[currentWordIndex].french;
+
+            if (userAnswer === correctAnswer) {
+                result.textContent = "Correct ! ✅";
+                result.style.color = "#185e0d";
+                score++;
+                scoreElement.textContent = score;
+            } else {
+                result.textContent = "❌ La réponse correcte est : " + correctAnswer;
+                result.style.color = "#8a0a08";
+                score--;
+                scoreElement.textContent = score;
+                if (missedWords[frenchWord]) {
+                    missedWords[frenchWord]++;
+                } else {
+                    missedWords[frenchWord] = 1;
+                }
+                displayMostMissedWords();
+            }
+
+            currentWordIndex = (currentWordIndex + 1) % vocabulary.length;
+            responseInput.value = ""; 
+            displayWord();  
+        }
+
+        function displayMostMissedWords() {
+            const missedWordsArray = Object.entries(missedWords);
+            missedWordsArray.sort((a, b) => b[1] - a[1]);
+            const numToShow = 5;
+            const mostMissedContainer = document.getElementById("most-missed-words");
+            mostMissedContainer.innerHTML = "";
+
+            for (let i = 0; i < numToShow; i++) {
+                if(i < missedWordsArray.length ){
+                    const [word, count] = missedWordsArray[i];
+                    const wordElement = document.createElement("p");
+                    wordElement.textContent = `${i+1} - ${word} : ${count} fois`;
+                    mostMissedContainer.appendChild(wordElement);
+                }
+                else{
+                    const wordElement = document.createElement("p");
+                    wordElement.textContent = `${i+1} - .............................`;
+                    mostMissedContainer.appendChild(wordElement);
+                }
+                
+            }
+        }
+
+        function generateJSONForMissedWords(vocabulary, missedWords) {
+            const wordsToDownload = [];
+
+            for (const word in missedWords) {
+                if (missedWords.hasOwnProperty(word) && missedWords[word] >= 2) {
+                    wordsToDownload.push(word);
+                }
+            }
+
+            const missedWordsWithTranslations = [];
+
+            for (const word of wordsToDownload) {
+                const translation = vocabulary.find(entry => entry.french === word);
+
+                if (translation) {
+                    missedWordsWithTranslations.push({
+                        french: word,
+                        english: translation.english
+                    });
+                }
+            }
+
+            const jsonContent = JSON.stringify(missedWordsWithTranslations, null, 2);
+
+            const blob = new Blob([jsonContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'missed_words.json';
+
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Gestionnaires d'événements
+        responseInput.addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                checkAnswer();
+            }
+        });
+
+        checkButton.addEventListener("click", checkAnswer);
+        downloadButton.addEventListener("click", function() {
+            generateJSONForMissedWords(vocabulary, missedWords);
+        });
+
+        importButton.addEventListener("click", function() {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener("change", function() {
+            const selectedFile = fileInput.files[0];
+
+            if (selectedFile) {
+                const reader = new FileReader();
+
+                reader.onload = function(event) {
+                    const jsonContent = event.target.result;
+                    try {
+                        const importedData = JSON.parse(jsonContent);
+                        vocabulary = importedData;
+                        shuffleArray(vocabulary);
+                        currentWordIndex = 0;
+                        score = 0;
+                        scoreElement.textContent = score;
+                        displayWord();
+                        result.textContent = "";
+                    } catch (error) {
+                        console.error("Erreur lors de l'importation du JSON : ", error);
+                    }
+                };
+
+                reader.readAsText(selectedFile);
+                missedWords = {};
+                displayMostMissedWords();
+            }
+        });
+
+        boutonMelanger.addEventListener("click", function() {
+            shuffleArray(vocabulary);
+            displayWord();
+        });
+
+        // Initialisation
+        shuffleArray(vocabulary);
+        displayWord();
+    </script>
+</body>
+</html>
